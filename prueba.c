@@ -48,9 +48,7 @@ int main() {
    struct dirent *ent;
    dir = opendir(".");
    while ((ent = readdir (dir)) != NULL){
-      if ( (strcmp(ent->d_name, ".")!=0) && (strcmp(ent->d_name, "..")!=0) ){
          creardir(ent->d_name);
-      }
    }
    printf("Se han creado las carpetas correctamente\n");
    closedir(dir);
