@@ -182,6 +182,7 @@ int main() {
    dir = opendir(".");
    while ((ent = readdir (dir)) != NULL){
          creardir(ent->d_name);
+<<<<<<< HEAD
    }
    printf("Se han creado las carpetas correctamente!\n\n");
 
@@ -198,6 +199,8 @@ int main() {
          ordenaractual(ent->d_name);
          
       }
+=======
+>>>>>>> 64bbbd0424677405688a20853c872e1fd3af4310
    }
    if (i == 2){
       printf("Su eleccion fue mayor cantidad de jugadores totales\n");
