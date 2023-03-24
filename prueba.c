@@ -14,9 +14,11 @@ bool estxt(char const *name)
 
 }
 
-int ordenaractual(char *nombre){
-   char or[255] = "/mnt/c/Users/benja/Escritorio/SO/";
-   char or1[255] = "/mnt/c/Users/benja/Escritorio/SO/";
+int ordenaractual(char *nombre, char *direccion){
+   char or[255];
+   char or1[255];
+   strcpy(or,direccion);
+   strcpy(or1,direccion);
    char name[100];
    strcpy(name,nombre);
    strcat(or,name);    //Direccion hacia la carpeta actual
@@ -72,9 +74,11 @@ int ordenaractual(char *nombre){
    return 0;
 }
 
-int ordenartotal(char *nombre){
-   char or[255] = "/mnt/c/Users/benja/Escritorio/SO/";
-   char or1[255] = "/mnt/c/Users/benja/Escritorio/SO/";
+int ordenartotal(char *nombre,char *direccion){
+   char or[255];
+   char or1[255];
+   strcpy(or,direccion);
+   strcpy(or1,direccion);
    char name[100];
    strcpy(name,nombre);
    strcat(or,name);    //Direccion hacia la carpeta actual
@@ -140,7 +144,7 @@ int crearcarpetas(char *direccion){
    return 0;
 }
 
-int creardir(char *nombre){
+int creardir(char *nombre, char *direccion){
    if (estxt(nombre)){
       char name[100];
       strcpy(name,nombre);
@@ -154,8 +158,10 @@ int creardir(char *nombre){
       fclose(fp);
 
       struct stat st = {0};
-      char dir[100] = "/mnt/c/Users/benja/Escritorio/SO/"; //Cambiar a direccion de archivos
-      char or[100] = "/mnt/c/Users/benja/Escritorio/SO/";
+      char dir[255]; //Cambiar a direccion de archivos
+      char or[255];
+      strcpy(or,direccion);
+      strcpy(dir,direccion);
       strcat(dir,gen);
       strcat(or,name);
 
@@ -178,10 +184,11 @@ int creardir(char *nombre){
 int main() {
    DIR *dir;
    int i;
+   char direct[255] = "/mnt/c/Users/benja/Escritorio/SO/";
    struct dirent *ent;
    dir = opendir(".");
    while ((ent = readdir (dir)) != NULL){
-         creardir(ent->d_name);
+         creardir(ent->d_name,direct);
    }
    printf("Se han creado las carpetas correctamente!\n\n");
 
@@ -195,14 +202,14 @@ int main() {
    if (i == 1){
       printf("Su eleccion fue mayor cantidad de jugadores actuales\n");
       while ((ent = readdir (dir)) != NULL){
-         ordenaractual(ent->d_name);
+         ordenaractual(ent->d_name,direct);
          
       }
    }
    if (i == 2){
       printf("Su eleccion fue mayor cantidad de jugadores totales\n");
       while ((ent = readdir (dir)) != NULL){
-         ordenartotal(ent->d_name);
+         ordenartotal(ent->d_name,direct);
    }
    }
    closedir(dir);
