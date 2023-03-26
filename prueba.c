@@ -14,9 +14,12 @@ bool estxt(char const *name)
 
 }
 
-int ordenaractual(char *nombre, char *direccion){
+int ordenaractual(char *nombre, char *direccion,int *total1, int *total2, int *total3){
    char or[255];
    char or1[255];
+   int conteo1 = 0;
+   int conteo2 = 0;
+   int conteo3 = 0;
    strcpy(or,direccion);
    strcpy(or1,direccion);
    char name[100];
@@ -44,6 +47,7 @@ int ordenaractual(char *nombre, char *direccion){
                strcat(or,ent1->d_name);
                rename(des,or);
                strcpy(or,or1);  //Se restaura direccion de origen
+               conteo1++;
             }
             if (f<40000){
                char cat[50] = "/Menor_a_40000";
@@ -55,6 +59,7 @@ int ordenaractual(char *nombre, char *direccion){
                strcat(or,ent1->d_name);
                rename(des,or);
                strcpy(or,or1);  //Se restaura direccion de origen
+               conteo2++;
             }
             if (f>=40000 && f<=80000){
                char cat[50] = "/Entre_40000_y_80000";
@@ -66,17 +71,34 @@ int ordenaractual(char *nombre, char *direccion){
                strcat(or,ent1->d_name);
                rename(des,or);
                strcpy(or,or1);  //Se restaura direccion de origen
+               conteo3++;
             }
 
          }
+   }
+   *total1 = *total1 + conteo1;
+   *total2 = *total2 + conteo2;
+   *total3 = *total3 + conteo3;
+   if (conteo1 == 0 && conteo2 == 0 && conteo3 == 0){
+      closedir(dir1);
+      return 0;  
+   }
+   else {
+      printf("Cantidad de juegos de %s\n",name);
+      printf("Juegos con una cantidad de jugadores actuales menor a 40000: %i\n",conteo2);
+      printf("Juegos con una cantidad de jugadores actuales entre 40000 y 80000: %i\n",conteo3);
+      printf("Juegos con una cantidad de jugadores actuales mayor a 80000: %i\n\n",conteo1);
    }
    closedir(dir1);
    return 0;
 }
 
-int ordenartotal(char *nombre,char *direccion){
+int ordenartotal(char *nombre,char *direccion,int *total1,int *total2, int *total3){
    char or[255];
    char or1[255];
+   int conteo1 = 0;
+   int conteo2 = 0;
+   int conteo3 = 0;
    strcpy(or,direccion);
    strcpy(or1,direccion);
    char name[100];
@@ -105,6 +127,7 @@ int ordenartotal(char *nombre,char *direccion){
                strcat(or,ent1->d_name);
                rename(des,or);  //Se mueve archivo
                strcpy(or,or1);  //Se restaura direccion de origen
+               conteo1++;
             }
             if (t<40000){
                char cat[50] = "/Menor_a_40000";
@@ -116,8 +139,9 @@ int ordenartotal(char *nombre,char *direccion){
                strcat(or,ent1->d_name);
                rename(des,or);   //Se mueve archivo
                strcpy(or,or1);  //Se restaura direccion de origen
+               conteo2++;
             }
-            if (t>=40000 && f<=80000){
+            if (t>=40000 && t<=80000){
                char cat[50] = "/Entre_40000_y_80000";
                strcpy(des,or);  //Carpeta de origen del juego
                strcat(or,cat);  //Carpeta de destino del juego 
@@ -127,12 +151,25 @@ int ordenartotal(char *nombre,char *direccion){
                strcat(or,ent1->d_name);
                rename(des,or);   //Se mueve archivo
                strcpy(or,or1);  //Se restaura direccion de origen
+               conteo3++;
             }
 
          }
    }
+   *total1 = *total1 + conteo1;
+   *total2 = *total2 + conteo2;
+   *total3 = *total3 + conteo3;
+   if (conteo1 == 0 && conteo2 == 0 && conteo3 == 0){
+      closedir(dir1);
+      return 0;  
+   }
+   else {
+      printf("Cantidad de juegos de %s\n",name);
+      printf("Juegos con una cantidad de jugadores menor a 40000: %i\n",conteo2);
+      printf("Juegos con una cantidad de jugadores entre 40000 y 80000: %i\n",conteo3);
+      printf("Juegos con una mayor cantidad de jugadores mayor a 80000: %i\n\n",conteo1);
+   }
    closedir(dir1);
-   return 0;
    return 0;
 }
 
@@ -182,10 +219,15 @@ int creardir(char *nombre, char *direccion){
 
 
 int main() {
-   DIR *dir;
    int i;
-   char direct[255] = "/mnt/c/Users/benja/Escritorio/SO/";
+   char direct[255] = "/mnt/c/Users/benja/Escritorio/SO/CWD/";
+   int total1 = 0;
+   int total2 = 0;
+   int total3 = 0;
+   DIR *dir;
    struct dirent *ent;
+   dir = opendir(".");
+   chdir(direct);
    dir = opendir(".");
    while ((ent = readdir (dir)) != NULL){
          creardir(ent->d_name,direct);
@@ -197,20 +239,33 @@ int main() {
    printf("Segun mayor cantidad de jugadores totales en el dia (2)\n");
    printf("Ingrese el numero correspondiente a su eleccion:  ");
    scanf("%i",&i);
-   printf("Su eleccion fue: %i\n",i);
+   printf("\n");
    rewinddir(dir);
    if (i == 1){
-      printf("Su eleccion fue mayor cantidad de jugadores actuales\n");
+      printf("Su eleccion fue mayor cantidad de jugadores actuales.\n\n");
       while ((ent = readdir (dir)) != NULL){
-         ordenaractual(ent->d_name,direct);
-         
+         ordenaractual(ent->d_name,direct,&total1,&total2,&total3);
       }
+      printf("Del total de juegos:\n");
+      printf("Existen %i con una cantidad de jugadores actuales menor a 40000\n",total2);
+      printf("Existen %i con una cantidad de jugadores actuales entre 40000 y 80000\n",total3);
+      printf("Existen %i con una cantidad de jugadores actuales mayor a 80000\n\n",total1);
    }
    if (i == 2){
-      printf("Su eleccion fue mayor cantidad de jugadores totales\n");
+      printf("Su eleccion fue mayor cantidad de jugadores totales.\n\n");
       while ((ent = readdir (dir)) != NULL){
-         ordenartotal(ent->d_name,direct);
+         ordenartotal(ent->d_name,direct,&total1,&total2,&total3);
+      }
+      printf("Del total de juegos:\n");
+      printf("Existen %i con una mayor cantidad de jugadores menor a 40000\n",total2);
+      printf("Existen %i con una mayor cantidad de jugadores entre 40000 y 80000\n",total3);
+      printf("Existen %i con una mayor cantidad de jugadores mayor a 80000\n\n",total1);
+      
    }
+   else {
+      closedir(dir);
+      return 0;
+
    }
    closedir(dir);
    return 0;
