@@ -173,14 +173,6 @@ int ordenartotal(char *nombre,char *direccion,int *total1,int *total2, int *tota
    return 0;
 }
 
-int crearcarpetas(char *direccion){
-   chdir(direccion);
-   mkdir("Menor_a_40000",0700);
-   mkdir("Entre_40000_y_80000",0700);
-   mkdir("Mayor_a_80000",0700);
-   return 0;
-}
-
 int creardir(char *nombre, char *direccion){
    if (estxt(nombre)){
       char name[100];
@@ -220,7 +212,7 @@ int creardir(char *nombre, char *direccion){
 
 int main() {
    int i;
-   char direct[255] = "/mnt/c/Users/benja/Escritorio/SO/CWD/";
+   char direct[255] = "direccion en donde se encuentran las carpetas";
    int total1 = 0;
    int total2 = 0;
    int total3 = 0;
