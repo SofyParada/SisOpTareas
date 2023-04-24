@@ -1,3 +1,3 @@
 main:
-	gcc Lab1.c -o lab1
-	./lab1
+	gcc Lab2.c -o lab2
+	./lab2
