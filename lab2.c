@@ -3,6 +3,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <string.h>
 
 
 int const CartasXjugador = 10;
@@ -13,6 +14,61 @@ static int CartasJugador2[10];
 static int CartasJugador3[10];
 static int CartasJugador4[10];
 static int FilasCartas[4][6];
+static int ListaID[4];
+
+
+/*
+Funcion BotRevisarCarta | Toma de parametros el mazo de un jugador con el tamano de este y la matriz de las cartas en mesa
+
+Primero elige una fila aleatoria en donde colocar la carta
+Despues elige la carta menor del mazo en caso de que no se pueda tirar otra,
+Elige la carta mas cercana a la ultima de la fila restandolas y comparando con las otras cartas quien tiene el resto menor
+
+Retorna la carta a jugar.
+
+*/
+
+int BotRevisarCarta(int *mazo,int ncartas, int *matriz, int filas, int columnas){
+        int i,menor,resto,ultimo,restomenor,retorno;
+        int fila = rand() % 4;
+        printf("La fila elegida fue: %i\n",fila+1);
+        for(i = 0; i < columnas ; i++){
+            if (*(matriz + fila * columnas + i) != 0){
+                ultimo = *(matriz + fila * columnas + i); //Busca cual es la ultima carta de la fila elegida
+            }
+            else if (*(matriz + fila * columnas + i) == 0){
+                break;
+            }        
+        }
+        
+        restomenor = 50;
+        menor = 50;
+        for (i=0;i<ncartas;i++){
+            printf("La carta actual es: %d\n",mazo[i]);
+            resto = mazo[i] - ultimo;  //Calcula resto
+            printf("El resto es %d\n",resto);
+            if(mazo[i] < menor){  //Busca la carta que sea menor en el mazo de un jugador
+                menor = mazo[i];
+            }
+            if (resto < restomenor && resto > 0){  //Cambia la carta a una que sea mas cercana al numero
+                printf("Se cambia retorno por uno menor\n");
+                retorno = mazo[i];
+                restomenor = resto;
+            }
+                
+        }
+    if (retorno != 0){
+        printf("Se retorna cercana\n");
+        return retorno;
+    }
+    else {
+        printf("Se retorna menor\n");
+        return menor;
+    }
+}
+
+
+
 
 int main() {
 
@@ -26,9 +82,11 @@ int main() {
     }
     
     // Imprimimos la baraja
+    /*
     for(int i = 0; i < 44; i++) {
         printf("%d\n", baraja[i]);
     }
+    */
 
     int CartasRepartidas = 0;
 
@@ -42,84 +100,127 @@ int main() {
         printf("%d\n", FilasCartas[i][0]);
     }
 
-    
-    
+    //Siguientes lineas crean los 4 procesos respectivos para cada jugadores y almacena sus ID
+    int i,ID_actual,ppid;
+    int jugador1,jugador2,jugador3,jugador4;
+    char string[10];
+    ppid = getpid();
+    printf("Soy el proceso padre con ID: %i\n",ppid);
+    for (i = 0; i < 4; i++) {
+        int pid = fork();
+        if (pid == 0 && getppid() == ppid) {  //Si el proceso es un hijo y su proceso padre es el proceso original
+            switch (i) {
+                case 0:
+                    jugador1 = getpid();
+                    ListaID[0] = jugador1;
+                    printf("Soy el jugador 1 de ID: %i\n",jugador1);
+                    break;
+                case 1:
+                    jugador2 = getpid();
+                    ListaID[1] = jugador2;
+                    printf("Soy el jugador 2 de ID: %i\n",jugador2);
+                    break;
+                case 2:
+                    jugador3 = getpid();
+                    ListaID[2] = jugador3;
+                    printf("Soy el jugador 3 de ID: %i\n",jugador3);
+                    break;
+                case 3:
+                    jugador4 = getpid();
+                    ListaID[3] = jugador4;
+                    printf("Soy el jugador 4 de ID: %i\n",jugador4);
+                    break;    
+                }
 
-    for(int i = 0; i < CartasXjugador; i++){
-        MisCartas[i] = baraja[CartasRepartidas];
-        CartasRepartidas++;
+
+            
+        } 
+        else {
+            continue;
+        }
     }
+    
 
-    pid_t jugador2 = fork();
 
-    if(jugador2 == 0){
-        
-        exit(0);
-    }
-    for(int i = 0; i < CartasXjugador; i++){
+    //Se crean barajas para cada jugador, verificando que el padre sea quien las crea
+
+
+    if(getpid() == ppid){
+        for(int i = 0; i < CartasXjugador; i++){
+            MisCartas[i] = baraja[CartasRepartidas];
+            CartasRepartidas++;
+        }
+        printf("Mis cartas: ");
+        for(int i = 0; i < CartasXjugador; i++){
+            if (i==0){
+                printf("%d", MisCartas[i]);
+            }
+            else{
+            printf(", %d", MisCartas[i]);
+            }
+        }
+        printf("\n");    
+    }   
+    
+
+    if(getpid() == ppid){
+        for(int i = 0; i < CartasXjugador; i++){
             CartasJugador2[i] = baraja[CartasRepartidas];
             CartasRepartidas++;
         }
-
-    pid_t jugador3 = fork();
-
-    if(jugador3 == 0){
-        int id;
-        int id1 = getpid();
-        if(id == id1){
-            for(int i = 0; i < CartasXjugador; i++){
-            CartasJugador3[i] = baraja[CartasRepartidas];
-            CartasRepartidas++;
+        printf("Cartas jugador 2: ");
+        for(int i = 0; i < CartasXjugador; i++){
+            if (i==0){
+                printf("%d", CartasJugador2[i]);
+            }
+            else{
+            printf(", %d", CartasJugador2[i]);
             }
         }
-       
-        exit(0);
-    }
-
-    for(int i = 0; i < CartasXjugador; i++){
-        CartasJugador3[i] = baraja[CartasRepartidas];
-        CartasRepartidas++;
-    }
-
-    pid_t jugador4 = fork();
-
-    if(jugador4 == 0){
+        printf("\n");
         
-        exit(0);
     }
-    for(int i = 0; i < CartasXjugador; i++){
+
+
+    if(getpid() == ppid){
+        for(int i = 0; i < CartasXjugador; i++){
+            CartasJugador3[i] = baraja[CartasRepartidas];
+            CartasRepartidas++;
+        }
+        printf("Cartas jugador 3: ");
+        for(int i = 0; i < CartasXjugador; i++){
+            if (i==0){
+                printf("%d", CartasJugador3[i]);
+            }
+            else{
+            printf(", %d", CartasJugador3[i]);
+            }
+        }
+        printf("\n");
+        
+    }
+
+    if(getpid() == ppid){
+        for(int i = 0; i < CartasXjugador; i++){
             CartasJugador4[i] = baraja[CartasRepartidas];
             CartasRepartidas++;
         }
-    
-    printf("Mis cartas: ");
-    for(int i = 0; i < CartasXjugador; i++){
-        printf(", %d", MisCartas[i]);
+        printf("Cartas jugador 4: ");
+        for(int i = 0; i < CartasXjugador; i++){
+            if (i==0){
+                printf("%d", CartasJugador4[i]);
+            }
+            else{
+            printf(", %d", CartasJugador4[i]);
+            }
+        }
+        printf("\n");
     }
-    printf("\n");
 
-    printf("cartas jugador 2: ");
-    for(int i = 0; i < CartasXjugador; i++){
-        printf(", %d", CartasJugador2[i]);
+    if (getpid() == ppid){
+        int caca = BotRevisarCarta(CartasJugador4,10, &FilasCartas[0][0],4,6);
+        printf("La carta a utilizar sera %i\n",caca);
     }
-    printf("\n");
-
-    printf("cartas jugador 3: ");
-    for(int i = 0; i < CartasXjugador; i++){
-        printf(", %d", CartasJugador3[i]);
-    }
-    printf("\n");
-
-    printf("cartas jugador 4: ");
-    for(int i = 0; i < CartasXjugador; i++){
-        printf(", %d", CartasJugador4[i]);
-    }
-    printf("\n");
-
-
-    wait(NULL);
-    wait(NULL);
-    wait(NULL);
     
 
     return 0;
