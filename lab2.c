@@ -73,12 +73,6 @@ int BotRevisarCarta(int *mazo,int ncartas, int *matriz, int filas, int columnas)
     }
 }
 
-int compare_integers(const void *a, const void *b) {
-    const int *ia = (const int *)a;
-    const int *ib = (const int *)b;
-    return *ia - *ib;
-}
-
 
 
 
