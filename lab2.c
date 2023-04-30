@@ -34,6 +34,26 @@ Elige la carta mas cercana a la ultima de la fila restandolas y comparando con l
 Retorna la carta a jugar.
 
 */
+int calculopuntos(int a){
+    int aux;
+    if (a%11 == 0){
+        //printf("Se le suman 5");
+        return 5;
+    }
+    if (a%10 == 0){
+        //printf("Se le suman 3");
+        return 3;
+    }
+    if (a%5 == 0){
+        //printf("Se le suman 2");
+        return 2;
+    }
+    else{
+        //printf("Se le suman 1");
+        return 1;
+    }
+}
+
 int ultimoxfila(int *matriz, int filas, int columnas, int carta){
     int ultimo, posx,posy,si,menor;
     int i,j;
@@ -52,38 +72,53 @@ int ultimoxfila(int *matriz, int filas, int columnas, int carta){
         if (menor > 0 && menor < si){
             si = menor;
             posx = i;
-            printf("La fila a reemplazar es: %d",posx);
+            //printf("La fila a reemplazar es: %d",posx);
 
             posy = j;
-            printf("La columna a reemplazar es: %d",posy);
+            //printf("La columna a reemplazar es: %d",posy);
 
-            printf("La carta a jugar sera %d con un resto de %d, despues de %d\n",carta,menor,ultimo);
+            //printf("La carta a jugar sera %d con un resto de %d, despues de %d\n",carta,menor,ultimo);
         }
 
         
     }
 
     if (posy == 5){
+        int neg = 0;
         printf("La carta %d se fue al gulag, no hay mas espacio\n",carta);
-        printf("Se le asignan puntos negativos\n");
+        for (i =0;i<5;i++){
+            neg = neg + calculopuntos(*(matriz + posx * columnas + i));
+        }
+        printf("Los puntos negativos asignados son: %d",neg);
         *(matriz + posx * columnas + 0) = carta;
         *(matriz + posx * columnas + 1) = 0;
         *(matriz + posx * columnas + 2) = 0;
         *(matriz + posx * columnas + 3) = 0;
         *(matriz + posx * columnas + 4) = 0;
         *(matriz + posx * columnas + 5) = 0;
-        return 0;
+        return neg;
     }
     else if (si == 50){
-        return 0;
+        printf("Carta no cabe en ningun espacio, se elige fila aleatoria y se asignan puntos negativos\n");
+        int neg = 0;
+        int fila = rand() % 4;
+        for (i =0;i<5;i++){
+            neg = neg + calculopuntos(*(matriz + posx * columnas + i));
+        }
+        *(matriz + fila * columnas + 0) = carta;
+        *(matriz + fila * columnas + 1) = 0;
+        *(matriz + fila * columnas + 2) = 0;
+        *(matriz + fila * columnas + 3) = 0;
+        *(matriz + fila * columnas + 4) = 0;
+        *(matriz + fila * columnas + 5) = 0;
+
+
+        return neg;
     }
     else{
         *(matriz + posx * columnas + posy) = carta;
+        return 0;
     }
-
-    
-
-    return 0;
 }
 int BotRevisarCarta(int *mazo,int ncartas, int *matriz, int filas, int columnas){
         int i,menor,resto,ultimo,restomenor,retorno,posm,pos;
@@ -326,10 +361,14 @@ int main() {
         printf("\n");
     }
 
-    int Carta1,Carta2,Carta3,Carta4,j;
+    int Carta1,Carta2,Carta3,Carta4,j,neg;
     int buffer1,buffer2,buffer3,buffer4;
+    int neg1 = 0;
+    int neg2 = 0;
+    int neg3 = 0;
+    int neg4 = 0;
 
-    for(i=0;i<4;i++){
+    for(i=0;i<10;i++){
 
         if (getpid() == ppid){
             sleep(3);
@@ -343,10 +382,6 @@ int main() {
             int orden[4] = {buffer1,buffer2,buffer3,buffer4};
             int n = sizeof(orden) / sizeof(orden[0]);
             qsort(orden, n, sizeof(int), compare);
-            printf("Sorted array: ");
-            for(j = 0; j < 4; j++) {
-                printf("%d ", orden[j]);
-            }
             printf("\n ");
             printf("\n ");
 
@@ -356,10 +391,23 @@ int main() {
             printf("La carta culia que jugo 4 es: %d\n",buffer4);
 
             //Se colocan cartas
-            ultimoxfila(&FilasCartas[0][0],4,6,orden[0]);
-            ultimoxfila(&FilasCartas[0][0],4,6,orden[1]);
-            ultimoxfila(&FilasCartas[0][0],4,6,orden[2]);
-            ultimoxfila(&FilasCartas[0][0],4,6,orden[3]);
+            for (j=0;j<4;j++){
+                neg = ultimoxfila(&FilasCartas[0][0],4,6,orden[j]);
+                //Calculo puntajes
+                if (orden[j] == buffer1){
+                    neg1 = neg1 + neg;
+                }
+                if (orden[j] == buffer2){
+                    neg2 = neg2 + neg;
+                }
+                if (orden[j] == buffer3){
+                    neg3 = neg3 + neg;
+                }
+                if (orden[j] == buffer4){
+                    neg4 = neg4 + neg;
+                }
+            }
+            
             printf("\n ");
 
             printf("Las filas quedaron:\n");
@@ -411,6 +459,14 @@ int main() {
     close(fd3[0]);
     close(fd4[1]);
     close(fd4[0]);
+    
+    if (getpid() == ppid){
+        printf("Los puntajes finales fueron:\n");
+        printf("Jugador 1: %d\n",neg1);
+        printf("Jugador 2: %d\n",neg2);
+        printf("Jugador 3: %d\n",neg3);
+        printf("Jugador 4: %d\n",neg4);
+    }
 
     return 0;
 }
