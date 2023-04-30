@@ -63,7 +63,7 @@ int ultimoxfila(int *matriz, int filas, int columnas, int carta){
         
     }
 
-    if (posy == 6){
+    if (posy == 5){
         printf("La carta %d se fue al gulag, no hay mas espacio\n",carta);
         printf("Se le asignan puntos negativos\n");
         *(matriz + posx * columnas + 0) = carta;
