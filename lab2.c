@@ -385,10 +385,10 @@ int main() {
             printf("\n ");
             printf("\n ");
 
-            printf("La carta culia que jugo 1 es: %d\n",buffer1);
-            printf("La carta culia que jugo 2 es: %d\n",buffer2);
-            printf("La carta culia que jugo 3 es: %d\n",buffer3);
-            printf("La carta culia que jugo 4 es: %d\n",buffer4);
+            printf("La carta que jugo 1 es: %d\n",buffer1);
+            printf("La carta que jugo 2 es: %d\n",buffer2);
+            printf("La carta que jugo 3 es: %d\n",buffer3);
+            printf("La carta que jugo 4 es: %d\n",buffer4);
 
             //Se colocan cartas
             for (j=0;j<4;j++){
@@ -423,7 +423,6 @@ int main() {
         }
 
         if (getpid() == jugador1){
-            int a;
             Carta1 = BotRevisarCarta(Mazo1,10, &FilasCartas[0][0],4,6);
             write(fd1[1], &Carta1, sizeof(int));
 
@@ -433,7 +432,6 @@ int main() {
         if (getpid() == jugador2){
 
             Carta2 = BotRevisarCarta(Mazo2,10, &FilasCartas[0][0],4,6);
-            //printf("El jugador 2 ha elegido la carta: %d\n",Carta2);
             write(fd2[1], &Carta2, sizeof(int));
 
 
@@ -442,13 +440,11 @@ int main() {
 
         if (getpid() == jugador3){
             Carta3 = BotRevisarCarta(Mazo3,10, &FilasCartas[0][0],4,6);
-            //printf("El jugador 3 ha elegido la carta: %d\n",Carta3);
             write(fd3[1], &Carta3, sizeof(int));
 
         }
         if (getpid() == jugador4){
             Carta4 = BotRevisarCarta(Mazo4,10, &FilasCartas[0][0],4,6);
-            //printf("El jugador 4 ha elegido la carta: %d\n",Carta4);
             write(fd4[1], &Carta4, sizeof(int));
 
         }
