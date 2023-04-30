@@ -34,7 +34,57 @@ Elige la carta mas cercana a la ultima de la fila restandolas y comparando con l
 Retorna la carta a jugar.
 
 */
+int ultimoxfila(int *matriz, int filas, int columnas, int carta){
+    int ultimo, posx,posy,si,menor;
+    int i,j;
+    si = 50;
+    //printf("La fila elegida fue: %i\n",fila+1);
+    for(i = 0; i < filas; i++){
+        for(j = 0; j < columnas ; j++){
+            if (*(matriz + i * columnas + j) != 0){
+                ultimo = *(matriz + i * columnas + j); //Busca cual es la ultima carta de la fila elegida
+            }
+            else if (*(matriz + i * columnas + j) == 0){
+                break;
+            }        
+        }
+        menor = carta - ultimo;
+        if (menor > 0 && menor < si){
+            si = menor;
+            posx = i;
+            printf("La fila a reemplazar es: %d",posx);
 
+            posy = j;
+            printf("La columna a reemplazar es: %d",posy);
+
+            printf("La carta a jugar sera %d con un resto de %d, despues de %d\n",carta,menor,ultimo);
+        }
+
+        
+    }
+
+    if (posy == 6){
+        printf("La carta %d se fue al gulag, no hay mas espacio\n",carta);
+        printf("Se le asignan puntos negativos\n");
+        *(matriz + posx * columnas + 0) = carta;
+        *(matriz + posx * columnas + 1) = 0;
+        *(matriz + posx * columnas + 2) = 0;
+        *(matriz + posx * columnas + 3) = 0;
+        *(matriz + posx * columnas + 4) = 0;
+        *(matriz + posx * columnas + 5) = 0;
+        return 0;
+    }
+    else if (si == 50){
+        return 0;
+    }
+    else{
+        *(matriz + posx * columnas + posy) = carta;
+    }
+
+    
+
+    return 0;
+}
 int BotRevisarCarta(int *mazo,int ncartas, int *matriz, int filas, int columnas){
         int i,menor,resto,ultimo,restomenor,retorno,posm,pos;
         int fila = rand() % 4;
@@ -71,6 +121,12 @@ int BotRevisarCarta(int *mazo,int ncartas, int *matriz, int filas, int columnas)
         mazo[posm] = 0;
         return menor;
     }
+}
+
+int compare(const void *a, const void *b) {
+    const int *auxa = (const int *)a;
+    const int *auxb = (const int *)b;
+    return *auxa - *auxb;
 }
 
 
@@ -158,7 +214,7 @@ int main() {
     int Mazo4[10];
 
 
-    //Se crean barajas para cada jugador, y las manda a cada jugador a traves de pipes
+    //Se crean barajas para cada jugador, verificando que el padre sea quien las cree
 
     if(getpid() == ppid){
 
@@ -204,8 +260,7 @@ int main() {
         close(fd4[1]);
              
     }
-    //Jugadores reciben sus cartas
-        
+    
     if (getpid() == jugador1){
 
         read(fd1[0], Mazo1, sizeof(Mazo1));
@@ -274,54 +329,83 @@ int main() {
     int Carta1,Carta2,Carta3,Carta4,j;
     int buffer1,buffer2,buffer3,buffer4;
 
-    for(i=0;i<2;i++){
+    for(i=0;i<4;i++){
 
-        if (getpid() == ppid){ //Recibe cartas jugadas por cada jugador y las imprime
-            int orden[4];
+        if (getpid() == ppid){
             sleep(3);
             printf("Turno numero: %d\n\n",i +1);
 
             read(fd1[0], &buffer1, sizeof(int));
-            orden[0] = buffer1;
             read(fd2[0], &buffer2, sizeof(int));
-            orden[1] = buffer2;
             read(fd3[0], &buffer3, sizeof(int));
-            orden[2] = buffer3;
             read(fd4[0], &buffer4, sizeof(int));
-            orden[3] = buffer4;
 
+            int orden[4] = {buffer1,buffer2,buffer3,buffer4};
+            int n = sizeof(orden) / sizeof(orden[0]);
+            qsort(orden, n, sizeof(int), compare);
+            printf("Sorted array: ");
+            for(j = 0; j < 4; j++) {
+                printf("%d ", orden[j]);
+            }
+            printf("\n ");
+            printf("\n ");
 
-            printf("La carta culia que jugo 1 es: %d\n",buffer4);
+            printf("La carta culia que jugo 1 es: %d\n",buffer1);
             printf("La carta culia que jugo 2 es: %d\n",buffer2);
             printf("La carta culia que jugo 3 es: %d\n",buffer3);
-            printf("La carta culia que jugo 4 es: %d\n",buffer4);     
+            printf("La carta culia que jugo 4 es: %d\n",buffer4);
+
+            //Se colocan cartas
+            ultimoxfila(&FilasCartas[0][0],4,6,orden[0]);
+            ultimoxfila(&FilasCartas[0][0],4,6,orden[1]);
+            ultimoxfila(&FilasCartas[0][0],4,6,orden[2]);
+            ultimoxfila(&FilasCartas[0][0],4,6,orden[3]);
+            printf("\n ");
+
+            printf("Las filas quedaron:\n");
+            for(int i = 0; i < 4; i++){
+                for(int j = 0; j < 6; j++){
+                    printf("%d ", FilasCartas[i][j]);
+                }
+                printf("\n");
+            }
+            printf("\n ");
+
+
         }
 
-        if (getpid() == jugador1){  //Ejecuta funcion para jugar carta y la manda a padre
+        if (getpid() == jugador1){
             int a;
             Carta1 = BotRevisarCarta(Mazo1,10, &FilasCartas[0][0],4,6);
             write(fd1[1], &Carta1, sizeof(int));
 
+
         }
 
-        if (getpid() == jugador2){ //Ejecuta funcion para jugar carta y la manda a padre
+        if (getpid() == jugador2){
+
             Carta2 = BotRevisarCarta(Mazo2,10, &FilasCartas[0][0],4,6);
             //printf("El jugador 2 ha elegido la carta: %d\n",Carta2);
             write(fd2[1], &Carta2, sizeof(int));
+
+
+
         }
 
-        if (getpid() == jugador3){ //Ejecuta funcion para jugar carta y la manda a padre
+        if (getpid() == jugador3){
             Carta3 = BotRevisarCarta(Mazo3,10, &FilasCartas[0][0],4,6);
             //printf("El jugador 3 ha elegido la carta: %d\n",Carta3);
             write(fd3[1], &Carta3, sizeof(int));
+
         }
-        if (getpid() == jugador4){ //Ejecuta funcion para jugar carta y la manda a padre
+        if (getpid() == jugador4){
             Carta4 = BotRevisarCarta(Mazo4,10, &FilasCartas[0][0],4,6);
             //printf("El jugador 4 ha elegido la carta: %d\n",Carta4);
             write(fd4[1], &Carta4, sizeof(int));
+
         }
     }
-    close(fd2[1]);  //Cierra todas las pipes
+    close(fd2[1]);
     close(fd2[0]);
     close(fd3[1]);
     close(fd3[0]);
