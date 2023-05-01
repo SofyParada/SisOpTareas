@@ -1,4 +1,4 @@
-Sofia Parada 202004671-9 Paralelo 200
+Sofía Parada 202004671-9 Paralelo 200
 Benjamin Gutierrez 202004621-2 Paralelo 200
 
 Especificacion archivos:
