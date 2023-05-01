@@ -74,7 +74,7 @@ int ultimoxfila(int *matriz, int filas, int columnas, int carta){
 
     if (posy == 5){
         int neg = 0;
-        printf("La carta %d se fue al gulag, no hay mas espacio\n",carta);
+        printf("La carta %d esta en la sexta posicion, se asignan puntos negativos\n",carta);
         for (i =0;i<5;i++){
             neg = neg + calculopuntos(*(matriz + posx * columnas + i));
         }
@@ -88,7 +88,7 @@ int ultimoxfila(int *matriz, int filas, int columnas, int carta){
         return neg;
     }
     else if (si == 50){
-        printf("Carta no cabe en ningun espacio, se elige fila aleatoria y se asignan puntos negativos\n");
+        printf("La carta %d no cabe en ningun espacio, se asignan puntos negativos\n",carta);
         int neg = 0;
         int fila = rand() % 4;
         for (i =0;i<5;i++){
@@ -302,6 +302,7 @@ int main() {
 
         read(fd1[0], Mazo1, sizeof(Mazo1));
 
+        /*
         printf("Cartas jugador 1: ");
             for(int i = 0; i < 10; i++){
                 if (i==0){
@@ -312,12 +313,13 @@ int main() {
                 }
             }
         printf("\n");
+        */
     }
 
     if (getpid() == jugador2){
-        sleep(2);
         read(fd2[0], Mazo2, sizeof(Mazo2));
 
+        /*
         printf("Cartas jugador 2: ");
             for(int i = 0; i < 10; i++){
                 if (i==0){
@@ -328,12 +330,13 @@ int main() {
                 }
             }
         printf("\n");
+        */
     }
 
     if (getpid() == jugador3){
-        sleep(3);
         read(fd3[0], Mazo3, sizeof(Mazo3));
 
+        /*
         printf("Cartas jugador 3: ");
             for(int i = 0; i < 10; i++){
                 if (i==0){
@@ -344,13 +347,14 @@ int main() {
                 }
             }
         printf("\n");
+        */
     }
 
     if (getpid() == jugador4){
-        sleep(4);
 
         read(fd4[0], Mazo4, sizeof(Mazo4));
 
+        /*
         printf("Cartas jugador 4: ");
             for(int i = 0; i < 10; i++){
                 if (i==0){
@@ -361,6 +365,7 @@ int main() {
                 }
             }
         printf("\n");
+        */
     }
 
     int Carta1,Carta2,Carta3,Carta4,j,neg;
@@ -471,6 +476,7 @@ int main() {
             pause();
             Carta2 = BotRevisarCarta(Mazo2,10, &FilasCartas[0][0],4,6);
             write(fd2[1], &Carta2, sizeof(int));
+            pause();
 
         }
 
@@ -478,12 +484,14 @@ int main() {
             pause();
             Carta3 = BotRevisarCarta(Mazo3,10, &FilasCartas[0][0],4,6);
             write(fd3[1], &Carta3, sizeof(int));
+            pause();
 
         }
         if (getpid() == jugador4){
             pause();
             Carta4 = BotRevisarCarta(Mazo4,10, &FilasCartas[0][0],4,6);
             write(fd4[1], &Carta4, sizeof(int));
+            pause();
 
         }
     }
@@ -500,6 +508,19 @@ int main() {
         printf("Jugador 2: %d\n",neg2);
         printf("Jugador 3: %d\n",neg3);
         printf("Jugador 4: %d\n",neg4);
+
+        if(neg1 < neg2 && neg1 < neg3 && neg1 < neg4){
+            printf("El ganador fue el jugador 1!\n");    
+        }
+        if(neg2 < neg1 && neg2 < neg3 && neg2 < neg4){
+            printf("El ganador fue el jugador 2!\n");    
+        }
+        if(neg3 < neg1 && neg3 < neg2 && neg3 < neg4){
+            printf("El ganador fue el jugador 3!\n");    
+        }
+        if(neg4 < neg1 && neg4 < neg2 && neg4 < neg3){
+            printf("El ganador fue el jugador 4!\n");    
+        }
     }
 
     return 0;
