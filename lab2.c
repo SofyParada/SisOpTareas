@@ -22,18 +22,6 @@ static int fd3[2];
 static int fd4[2];
 
 
-
-
-/*
-Funcion BotRevisarCarta | Toma de parametros el mazo de un jugador con el tamano de este y la matriz de las cartas en mesa
-
-Primero elige una fila aleatoria en donde colocar la carta
-Despues elige la carta menor del mazo en caso de que no se pueda tirar otra,
-Elige la carta mas cercana a la ultima de la fila restandolas y comparando con las otras cartas quien tiene el resto menor
-
-Retorna la carta a jugar.
-
-*/
 int calculopuntos(int a){
     int aux;
     if (a%11 == 0){
@@ -53,6 +41,7 @@ int calculopuntos(int a){
         return 1;
     }
 }
+
 
 int ultimoxfila(int *matriz, int filas, int columnas, int carta){
     int ultimo, posx,posy,si,menor;
@@ -120,6 +109,18 @@ int ultimoxfila(int *matriz, int filas, int columnas, int carta){
         return 0;
     }
 }
+
+
+/*
+Funcion BotRevisarCarta | Toma de parametros el mazo de un jugador con el tamano de este y la matriz de las cartas en mesa
+
+Primero elige una fila aleatoria en donde colocar la carta
+Despues elige la carta menor del mazo en caso de que no se pueda tirar otra,
+Elige la carta mas cercana a la ultima de la fila restandolas y comparando con las otras cartas quien tiene el resto menor
+
+Retorna la carta a jugar.
+
+*/
 int BotRevisarCarta(int *mazo,int ncartas, int *matriz, int filas, int columnas){
         int i,menor,resto,ultimo,restomenor,retorno,posm,pos;
         int fila = rand() % 4;
@@ -164,14 +165,15 @@ int compare(const void *a, const void *b) {
     return *auxa - *auxb;
 }
 
-
+void sigcont_handler(int signal_number) {
+}
 
 
 
 
 int main() {
 
-
+    signal(SIGCONT, sigcont_handler);
     // Barajamos las cartas
     srand(time(NULL));
     for(int i = 0; i < 44; i++) {
@@ -367,10 +369,11 @@ int main() {
     int neg2 = 0;
     int neg3 = 0;
     int neg4 = 0;
-
+    bool flag = false;
     for(i=0;i<10;i++){
 
         if (getpid() == ppid){
+            pause();
             sleep(3);
             printf("Turno numero: %d\n\n",i +1);
 
@@ -419,31 +422,66 @@ int main() {
             }
             printf("\n ");
 
+            kill(jugador1,SIGCONT);
+
 
         }
 
         if (getpid() == jugador1){
-            Carta1 = BotRevisarCarta(Mazo1,10, &FilasCartas[0][0],4,6);
-            write(fd1[1], &Carta1, sizeof(int));
+            sleep(3);
+            int a;
+            printf("Mis cartas son: ");
+            for(int j = 0; j < 10; j++){
+                if (j==0){
+                    printf("%d", Mazo1[j]);
+                }
+                else{
+                    printf(", %d", Mazo1[j]);
+                }
+            }
+            printf("\n");
+            flag = false;
+            while(flag==false){
+                printf("Ingresar carta a jugar: ");
+                scanf("%d",&a);
+                for(j = 0;j<10;j++){
+                    if (Mazo1[j] == a){
+                        flag = true;
+                        Mazo1[j] = 0;
+                        kill(jugador2,SIGCONT);
+                        break;
+                    }
+                    
+                }
+                if (flag==false){
+                    printf("No tiene esa carta, porfavor intentelo denuevo.\n");
+                }
+            }
 
+            
+
+            write(fd1[1], &a, sizeof(int));
+            pause();
+            
 
         }
 
         if (getpid() == jugador2){
 
+            pause();
             Carta2 = BotRevisarCarta(Mazo2,10, &FilasCartas[0][0],4,6);
             write(fd2[1], &Carta2, sizeof(int));
-
-
 
         }
 
         if (getpid() == jugador3){
+            pause();
             Carta3 = BotRevisarCarta(Mazo3,10, &FilasCartas[0][0],4,6);
             write(fd3[1], &Carta3, sizeof(int));
 
         }
         if (getpid() == jugador4){
+            pause();
             Carta4 = BotRevisarCarta(Mazo4,10, &FilasCartas[0][0],4,6);
             write(fd4[1], &Carta4, sizeof(int));
 
