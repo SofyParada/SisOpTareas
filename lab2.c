@@ -497,6 +497,8 @@ int main() {
 
         }
     }
+    close(fd1[1]);
+    close(fd1[0]);
     close(fd2[1]);
     close(fd2[0]);
     close(fd3[1]);
