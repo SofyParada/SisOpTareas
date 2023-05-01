@@ -382,11 +382,12 @@ int main() {
             sleep(3);
             printf("Turno numero: %d\n\n",i +1);
 
-            read(fd1[0], &buffer1, sizeof(int));
-            read(fd2[0], &buffer2, sizeof(int));
-            read(fd3[0], &buffer3, sizeof(int));
-            read(fd4[0], &buffer4, sizeof(int));
-
+            if(read(fd1[0], &buffer1, sizeof(int))){
+                read(fd2[0], &buffer2, sizeof(int));
+                read(fd3[0], &buffer3, sizeof(int));
+                read(fd4[0], &buffer4, sizeof(int));
+            }
+            
             int orden[4] = {buffer1,buffer2,buffer3,buffer4};
             int n = sizeof(orden) / sizeof(orden[0]);
             qsort(orden, n, sizeof(int), compare);
@@ -402,16 +403,17 @@ int main() {
             for (j=0;j<4;j++){
                 neg = ultimoxfila(&FilasCartas[0][0],4,6,orden[j]);
                 //Calculo puntajes
-                if (orden[j] == buffer1){
+                if (orden[j] == buffer1 && neg > 0){
+                    printf("Se suma al 1\n");
                     neg1 = neg1 + neg;
                 }
-                if (orden[j] == buffer2){
+                if (orden[j] == buffer2 && neg > 0){
                     neg2 = neg2 + neg;
                 }
-                if (orden[j] == buffer3){
+                if (orden[j] == buffer3 && neg > 0){
                     neg3 = neg3 + neg;
                 }
-                if (orden[j] == buffer4){
+                if (orden[j] == buffer4 && neg > 0){
                     neg4 = neg4 + neg;
                 }
             }
@@ -512,13 +514,13 @@ int main() {
         if(neg1 < neg2 && neg1 < neg3 && neg1 < neg4){
             printf("El ganador fue el jugador 1!\n");    
         }
-        if(neg2 < neg1 && neg2 < neg3 && neg2 < neg4){
+        else if(neg2 < neg1 && neg2 < neg3 && neg2 < neg4){
             printf("El ganador fue el jugador 2!\n");    
         }
-        if(neg3 < neg1 && neg3 < neg2 && neg3 < neg4){
+        else if(neg3 < neg1 && neg3 < neg2 && neg3 < neg4){
             printf("El ganador fue el jugador 3!\n");    
         }
-        if(neg4 < neg1 && neg4 < neg2 && neg4 < neg3){
+        else if(neg4 < neg1 && neg4 < neg2 && neg4 < neg3){
             printf("El ganador fue el jugador 4!\n");    
         }
     }
