@@ -90,6 +90,15 @@ public class Threads extends Thread{
         }
         else{
             System.out.println("No es divisible");
+            for(int n=0 ;n<largo ;n++){
+                for(int m=0 ;m<largo ;m++){
+                    int tesoro = matriz[n][m];
+                    if (tesoro == 1){
+                        System.out.println("AQUI TA EL TESOROOO");
+                        break;
+                    }
+                }
+            }
         }
         System.out.println("Hilo terminado.");
     }
