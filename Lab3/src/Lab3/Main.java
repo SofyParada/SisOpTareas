@@ -2,8 +2,7 @@ package Lab3;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
-import java.util.Arrays;
-import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 
 public class Main {
 
@@ -64,8 +63,17 @@ public class Main {
             thread.setLargo(N);
             thread.setTesoro(T);
             thread.setMatriz(matriz);
-
             thread.EjecutarThread();
+            //Ejecucion Forks!!
+            System.out.println("\n");
+            
+            System.out.println("Comienza ejecucion de forks");
+
+            ForkJoinPool fork = ForkJoinPool.commonPool();
+            Forks search = new Forks(matriz, T, N, 0, 0);
+            fork.invoke(search);
+            //Ejecucion normal!!
+
              
             
             scanner.close();
