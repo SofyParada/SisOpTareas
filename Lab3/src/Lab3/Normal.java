@@ -12,6 +12,13 @@ public class Normal{
 
     public void BuscarTesoro() {
         //Implementar busqueda de tesoro normal, sin uso de forks ni threads
+        for(int i = 0; i < matriz.length; i++ ){
+            for(int j = 0; j < matriz[i].length; j++){
+                if(matriz[i][j] == 1){
+                    System.out.println("AQUI ESTA EL TESORO, en la posición: ["+i+','+j+']');
+                }
+            }
+        }
     }
 
 
