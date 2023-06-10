@@ -4,10 +4,10 @@ public class Normal{
     private int tesoro;
     private int[][] matriz;
 
-    public Normal() {
-        this.largo = 0;
-        this.tesoro = 0;
-        this.matriz = new int[0][0];
+    public Normal(int largo, int tesoro, int[][] matriz) {
+        this.largo = largo;
+        this.tesoro = tesoro;
+        this.matriz = matriz;
     }
 
     public void BuscarTesoro() {
@@ -15,7 +15,8 @@ public class Normal{
         for(int i = 0; i < matriz.length; i++ ){
             for(int j = 0; j < matriz[i].length; j++){
                 if(matriz[i][j] == 1){
-                    System.out.println("AQUI ESTA EL TESORO, en la posición: ["+i+','+j+']');
+                    System.out.println("El tesoro se encuentra en la coordenada: ["+(i+1)+','+(j+1)+']');
+                    break;
                 }
             }
         }

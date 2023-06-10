@@ -8,6 +8,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
+            Object lock = new Object();
             File file = new File("ubicacion-tesoro.txt");
             Scanner scanner = new Scanner(file);
             int N = 0;
@@ -57,22 +58,61 @@ public class Main {
                  
                 System.out.println("Termina de crearse la matriz");
             }
-            
+            System.out.println("\n");
             //Ejecucion Thread!!
             Threads thread = new Threads();
             thread.setLargo(N);
             thread.setTesoro(T);
             thread.setMatriz(matriz);
+
+            long startTime = System.nanoTime();
             thread.EjecutarThread();
+            long endTime = System.nanoTime();
+
+            long duracion = endTime - startTime;
+            System.out.println("Se demora  "+duracion+" ms en ejecutar con threads");
+
+
             //Ejecucion Forks!!
             System.out.println("\n");
-            
+
             System.out.println("Comienza ejecucion de forks");
 
+            startTime = System.nanoTime();
+            
             ForkJoinPool fork = ForkJoinPool.commonPool();
-            Forks search = new Forks(matriz, T, N, 0, 0);
+            Forks search = new Forks(matriz, T, N, 0, 0, lock);
             fork.invoke(search);
+            
+            try{ //Espera a que terminen todos los forks
+                synchronized (lock) {
+                    lock.wait();
+                }
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            
+            endTime = System.nanoTime();
+            duracion = endTime - startTime;
+            System.out.println("Se demora  "+duracion+" ms en ejecutar con forks");
+            
             //Ejecucion normal!!
+            System.out.println("\n");
+            System.out.println("Comienza ejecucion normal");
+
+            Normal normal = new Normal(N, T, matriz);
+            startTime = System.nanoTime();
+
+            normal.BuscarTesoro();
+
+            endTime = System.nanoTime();
+            System.out.println("Termina ejecucion normal");
+
+            duracion = endTime - startTime;
+
+            System.out.println("Se demora  "+duracion+" ns en ejecutar sin threads ni forks");
 
              
             

@@ -3,9 +3,6 @@ public class Threads extends Thread{
     private int largo;
     private int tesoro;
     private int[][] matriz;
-    private int[][] matriz1;
-    private int cuadrante;
-    private int iteracion;
     private int posx;
     private int posy;
     private Object lock;
@@ -14,9 +11,6 @@ public class Threads extends Thread{
         this.largo = 0;
         this.tesoro = 0;
         this.matriz = new int[0][0];
-        this.matriz1 = new int[0][0];
-        this.cuadrante = 0;
-        this.iteracion = -1;
         this.posx = 0;
         this.posy = 0;
         this.lock = new Object();
@@ -53,7 +47,6 @@ public class Threads extends Thread{
                 int[][] newmatriz = new int[largo/2][largo/2];
                 switch(i){
                     case 0: //Primer cuadrante (Arriba izquierda)
-                    cuadrante = 1;
                     offsetx = 0;
                     offsety = 0;
                     for(int n=0 ;n<newlargo ;n++){
@@ -65,7 +58,6 @@ public class Threads extends Thread{
                     break;
                     
                     case 1: //Segundo cuadrante (Arriba derecha)
-                    cuadrante = 2;
                     offsetx = 0;
                     offsety = newlargo;
                     for(int n=0 ;n<newlargo ;n++){
@@ -78,7 +70,6 @@ public class Threads extends Thread{
                     break;
 
                     case 2: //Tercer cuadrante  (Abajo izquierda)
-                    cuadrante = 3;
                     offsetx = newlargo;
                     offsety = 0;
                     int j = -1;
@@ -91,7 +82,6 @@ public class Threads extends Thread{
                     break;
 
                     case 3: //Cuarto cuadrante (Abajo derecha)
-                    cuadrante = 4;
                     offsetx = newlargo;
                     offsety = newlargo;
                     j = -1;
@@ -109,9 +99,6 @@ public class Threads extends Thread{
                 thread.setLargo(largo/2);
                 thread.setTesoro(tesoro);
                 thread.setMatriz(newmatriz);
-                thread.setMatriz1(matriz1);
-                thread.setCuadrante(cuadrante);
-                thread.setIteracion(iteracion);
                 thread.setPosx(posx + offsetx);
                 thread.setPosy(posy + offsety);
                 thread.setLock(lock);
@@ -127,11 +114,10 @@ public class Threads extends Thread{
                     if (found == 1){
                         int posXTesoro = posx + n + 1; // Actualizar la coordenada X del tesoro
                         int posYTesoro = posy + m + 1; // Actualizar la coordenada Y del tesoro
-                        System.out.println("El tesoro se encuentra en la coordenada: "+posXTesoro+","+posYTesoro);
+                        System.out.println("El tesoro se encuentra en la coordenada: ["+posXTesoro+","+posYTesoro+"]");
                         synchronized (lock) {
                             lock.notifyAll();
                         }
-                        this.setIteracion(iteracion);
                         return;
                     }
                 }
@@ -157,17 +143,6 @@ public class Threads extends Thread{
         return tesoro;
     }
 
-    public void setCuadrante(int x){
-        cuadrante = x;
-    }
-
-    public void setIteracion(int x){
-        iteracion = x;
-    }
-    public int getIteracion(){
-        return iteracion;
-    }
-
     public void setPosx(int x){
         posx = x;
     }
@@ -176,9 +151,6 @@ public class Threads extends Thread{
         posy = x;
     }
 
-    public int getCuadrante(){
-        return cuadrante;
-    }
 
     public void setMatriz(int[][] x){
         matriz = x;
@@ -187,14 +159,6 @@ public class Threads extends Thread{
     public int[][] getMatriz(){
         return matriz;
     }
-    public void setMatriz1(int[][] x){
-        matriz1 = x;
-    }
-
-    public int[][] getMatriz1(){
-        return matriz1;
-    }
-    
     public void setLock(Object x) {
         this.lock = x;
     }
