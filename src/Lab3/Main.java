@@ -70,7 +70,7 @@ public class Main {
             long endTime = System.nanoTime();
 
             long duracion = endTime - startTime;
-            System.out.println("Se demora  "+duracion+" ms en ejecutar con threads");
+            System.out.println("Se demora  "+duracion+" ns en ejecutar con threads");
 
 
             //Ejecucion Forks!!
@@ -96,7 +96,7 @@ public class Main {
             
             endTime = System.nanoTime();
             duracion = endTime - startTime;
-            System.out.println("Se demora  "+duracion+" ms en ejecutar con forks");
+            System.out.println("Se demora  "+duracion+" ns en ejecutar con forks");
             
             //Ejecucion normal!!
             System.out.println("\n");
