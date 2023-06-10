@@ -13,7 +13,8 @@ una vez en la ubicacion, en la consola escribir make, de esta forma el makefile
 compilara los archivos creando una carpeta build y un ejecutable .jar, el cual es iniciado al mismo tiempo.
  
 En la consola se indicaran los valores leidos, luego secuencialmente se ejecutaran los programas para 
-buscar el tesoro en orden thread, fork y normal, mostrando el tiempo de ejecucion de cada uno en nanosegundos.
+buscar el tesoro en orden thread, fork y normal, mostrando el tiempo de ejecucion de cada uno en nanosegundos,
+si se quiere pasar a ms se debe multiplicar por 1000000
 
 
 
