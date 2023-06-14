@@ -1,0 +1,30 @@
+import threading
+import time
+import datetime
+import random
+
+NTHREAD = 150
+Juegos = ["Montaña Rusa", "Casa de Terror", "Carrusel", "Barco Pirata"]
+tiemponow = datetime.datetime.now()
+tiempo = str(tiemponow)[11:]
+
+print(tiempo)
+
+def Funcion():
+    return 1
+
+i = 0
+while(i < NTHREAD):
+    #Se crea la hebra
+    NPERSONA ='Persona' + str(i+1)
+    threading.Thread(name=NPERSONA, target=Funcion, args=(1, ))
+    
+    #Se eligen os dos juegos aleatoriamente de la persona o hebra (sin que se repita el mismo juego)
+    JuegoAleatorio1 = random.choice(Juegos)
+    
+    Juegos2 = Juegos
+    Juegos2.remove(JuegoAleatorio1)
+    
+    JuegoAleatorio2 = random.choice(Juegos2)
+    i+=1
+    
