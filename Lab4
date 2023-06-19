@@ -5,19 +5,47 @@ import random
 
 NTHREAD = 150
 Juegos = ["Montaña Rusa", "Casa de Terror", "Carrusel", "Barco Pirata"]
-tiemponow = datetime.datetime.now()
+tiemponow = datetime.datetime.now() #para luego hacer los txt pedidos con el tiempo corresondiente
 tiempo = str(tiemponow)[11:]
+semaforo1 = threading.Semaphore(1) #Crear variable de tipo semaforo1
+semaforo2 = threading.Semaphore(1) #Crear variable de tipo semaforo2
+Lock = threading.Lock() #Se crea la variable lock
+
+filazonacomun = 0
+filaMontana = 0
+filaCasa = 0
+filaCarrusel = 0
+filaBarco = 0
+
+quiereMontana = 0
+quiereCasa = 0
+quiereCarrusel = 0
+quiereBarco = 0
 
 print(tiempo)
 
-def Funcion():
-    return 1
+def MontanaRusa():
+    Lock.acquire()
+    if(filaMontana < 10):
+        semaforo1.acquire(Lock)
+    
+    else:
+        filaMontana -= 10
+        semaforo2.release()
+        Lock.release()
+    
 
-i = 0
-while(i < NTHREAD):
-    #Se crea la hebra
-    NPERSONA ='Persona' + str(i+1)
-    threading.Thread(name=NPERSONA, target=Funcion, args=(1, ))
+def CasaTerror():
+    return 1
+def Carrusel():
+    return 1
+def BarcoPirata():
+    return 1
+    
+
+
+def ZonaComun():
+    filazonacomun += 1
     
     #Se eligen os dos juegos aleatoriamente de la persona o hebra (sin que se repita el mismo juego)
     JuegoAleatorio1 = random.choice(Juegos)
@@ -26,5 +54,55 @@ while(i < NTHREAD):
     Juegos2.remove(JuegoAleatorio1)
     
     JuegoAleatorio2 = random.choice(Juegos2)
+    
+    if(JuegoAleatorio1 == "Montaña Rusa"):
+        quiereMontana += 1
+        
+        MontanaRusa()
+        Lock.acquire()
+        while(filaMontana == 10):
+            semaforo2.acquire(Lock)
+        
+        
+        if(filaMontana < 10):
+            filaMontana += 1
+            filazonacomun -= 1
+            
+        
+    elif(JuegoAleatorio1 == "Casa de Terror"):
+        quiereCasa += 1
+        
+        if(filaCasa < 8):
+            filaCasa += 1
+            filazonacomun -= 1
+            CasaTerror()
+        
+    elif(JuegoAleatorio1 == "Carrusel"):
+        quiereCarrusel += 1
+        
+        if(filaCarrusel < 15):
+            filaCarrusel += 1
+            filazonacomun -= 1
+            Carrusel()
+        
+    elif(JuegoAleatorio1 == "Barco Pirata"):
+        quiereBarco += 1
+        
+        if(filaBarco < 6):
+            filaBarco += 1
+            filazonacomun -= 1
+            BarcoPirata()
+        
+
+    return 1
+
+i = 0
+while(i < NTHREAD):
+    #Se crea la hebra
+    NPERSONA ='Persona' + str(i+1)
+    threading.Thread(name=NPERSONA, target=ZonaComun, args=( ))
+    
     i+=1
+    
+    
     
