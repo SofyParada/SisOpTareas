@@ -12,6 +12,7 @@ fmontana = open("Montana_rusa.txt","w")
 fcasa = open("Casa_Terror.txt","w")
 fcarrusel = open("Carrusel.txt","w")
 fbarco = open("Barco_Pirata.txt","w")
+fsalida = open("Salida.txt", "w")
 
 
 NTHREAD = 10
@@ -32,8 +33,10 @@ cv4 = Condition()
 cv4a = Condition()
 cv5 = Condition()
 cv6 = Condition()
+cv6a = Condition()
 cv7 = Condition()
 cv8 = Condition()
+cv8a = Condition()
 Lock = Lock() #Se crea la variable lock
 
 filazonacomun = 0
@@ -51,7 +54,7 @@ dispCasa = True
 dispCarrusel = True
 dispBarco = True
 
-print(tiempo)
+
 
 def MontanaRusa(contador):
     global filaMontana
@@ -105,7 +108,7 @@ def CasaTerror(contador):
     if (contCasa <= 2):  # Si hay 2 o menos personas en la fila puede entrar al juego
         semFilaCasaAux.acquire()  #Agarro semaforo con limite de 2 personas
         contCasa += 1  #Contador de cuantas personas estan en el Juego
-        print("Ingresa al juego")
+        print("Ingresa al juego"+threading.current_thread().name)
         filaCasa -= 1  #Resto personas a la fila
         tiempodesp = datetime.datetime.now()
         tiempod = str(tiempodesp)[11:]
@@ -132,10 +135,89 @@ def CasaTerror(contador):
             return
         
 
-def Carrusel():
-    return 1
-def BarcoPirata():
-    return 1
+def Carrusel(contador):
+    global filaCarrusel
+    global dispCarrusel
+    global contCarrusel
+    tiempoa = ""
+    tiempoantes = datetime.datetime.now()
+    tiempoa = str(tiempoantes)[11:]
+    while (filaCarrusel == 15):  #Si la fila es de 8 personas, se bloquea entrada de mas gente, creo que esto ta malo XD
+        dispCarrusel = False
+        with cv6:
+            cv6.wait()  #Pauso procesos
+
+
+    if (contCarrusel <= 5):  # Si hay 2 o menos personas en la fila puede entrar al juego
+        semFilaCarAux.acquire()  #Agarro semaforo con limite de 2 personas
+        contCarrusel += 1  #Contador de cuantas personas estan en el Juego
+        print("Ingresa al juego"+threading.current_thread().name)
+        filaCarrusel -= 1  #Resto personas a la fila
+        tiempodesp = datetime.datetime.now()
+        tiempod = str(tiempodesp)[11:]
+        while (contCarrusel != 5):
+            if (filaCarrusel == 0 and filazonacomun == 0): #Si no hay nadie mas esperando
+                contCarrusel = 5
+                break
+            with cv6a:
+                cv6a.wait()
+
+        
+        if (contCarrusel == 5):  #Si hay 2 personas se continua
+            Lock.acquire()
+            time.sleep(1.4)  #Se duerme el tiempo que dura el juego, si no se usa esto el proceso no funciona muere
+            Lock.release()
+            with cv6a:
+                cv6a.notify() #Notifico a la persona esperando que puede ingresar
+            with cv6:
+                cv6.notify() #Notifico a la fila que se puede continuar con mas gente
+            Lock.acquire()
+            string = threading.current_thread().name + "," + tiempoa + "," + tiempod + "," + str(contador) + "\n"
+            fcarrusel.write(string) #Creo string para ingresar a txt
+            Lock.release()
+            return
+        
+def BarcoPirata(contador):
+    global filaBarco
+    global dispBarco
+    global contBarco
+    tiempoa = ""
+    tiempoantes = datetime.datetime.now()
+    tiempoa = str(tiempoantes)[11:]
+    while (filaBarco == 6):  #Si la fila es de 8 personas, se bloquea entrada de mas gente, creo que esto ta malo XD
+        dispBarco = False
+        with cv8:
+            cv8.wait()  #Pauso procesos
+
+
+    if (contBarco <= 3):  # Si hay 2 o menos personas en la fila puede entrar al juego
+        semFilaBarAux.acquire()  #Agarro semaforo con limite de 2 personas
+        contBarco += 1  #Contador de cuantas personas estan en el Juego
+        print("Ingresa al juego"+threading.current_thread().name)
+        filaBarco -= 1  #Resto personas a la fila
+        tiempodesp = datetime.datetime.now()
+        tiempod = str(tiempodesp)[11:]
+        while (contBarco != 3):
+            if (filaBarco == 0 and filazonacomun == 0): #Si no hay nadie mas esperando
+                contBarco = 3
+                break
+            with cv8a:
+                cv8a.wait()
+
+        
+        if (contBarco == 3):  #Si hay 2 personas se continua
+            Lock.acquire()
+            time.sleep(1.333333)  #Se duerme el tiempo que dura el juego, si no se usa esto el proceso no funciona muere
+            Lock.release()
+            with cv8a:
+                cv8a.notify() #Notifico a la persona esperando que puede ingresar
+            with cv8:
+                cv8.notify() #Notifico a la fila que se puede continuar con mas gente
+            Lock.acquire()
+            string = threading.current_thread().name + "," + tiempoa + "," + tiempod + "," + str(contador) + "\n"
+            fbarco.write(string) #Creo string para ingresar a txt
+            Lock.release()
+            return
     
 
 
@@ -155,7 +237,7 @@ def ZonaComun():
         global contCasa
         global contCarrusel
         global contBarco
-        Juegos = ["Montaña Rusa"]  #Lista de juegos
+        Juegos = ["Barco Pirata"]  #Lista de juegos
 
         Lock.acquire()
         filazonacomun += 1
@@ -213,6 +295,7 @@ def ZonaComun():
 
             if (dispCasa == True):
                 semFilaCasa.acquire() #Agarra puesto en la fila
+                print("Entro a la fila "+threading.current_thread().name)
                 contador += 1
                 Lock.acquire()
                 filaCasa += 1
@@ -227,12 +310,13 @@ def ZonaComun():
                 if (contCasa == 0): #Si no quedan mas jugadores en la fila
                     with cv3:
                         cv3.notify_all() #Libero fila por si esta bloqueada
-                    print("Termina ejecucion de casa")
+                    print("Salgo de la fila " +threading.current_thread().name)
                     dispCasa = True 
                     semFilaCasaAux.release() #Libero recursos de semaforos
                     semFilaCasa.release()
                 
                 while (contCasa == 1):
+                    print("Salgo de la fila " +threading.current_thread().name)
                     with cv3:
                         cv3.wait()
                     semFilaCasa.release()
@@ -241,15 +325,77 @@ def ZonaComun():
                     
             
         elif(JuegoAleatorio1 == "Carrusel"): 
+            while (dispCarrusel == False): #Si no hay espacio en la fila, esperan
+                with cv5:
+                    cv5.wait()
+                
 
-                return
+            if (dispCarrusel == True):
+                semFilaCarrusel.acquire() #Agarra puesto en la fila
+                print("Entro a la fila "+threading.current_thread().name)
+                contador += 1
+                Lock.acquire()
+                filaCarrusel += 1
+                filazonacomun -= 1
+                Lock.release()
+                Carrusel(contador)
+                
+                Lock.acquire()
+                contCarrusel -= 1 #Se baja persona del juego
+                Lock.release()
+                
+                if (contCarrusel == 0): #Si no quedan mas jugadores en la fila
+                    with cv5:
+                        cv5.notify_all() #Libero fila por si esta bloqueada
+                    print("Salgo de la fila " +threading.current_thread().name)
+                    dispCarrusel = True 
+                    semFilaCarAux.release() #Libero recursos de semaforos
+                    semFilaCarrusel.release()
+                
+                while (contCarrusel == 1):
+                    print("Salgo de la fila " +threading.current_thread().name)
+                    with cv5:
+                        cv5.wait()
+                    semFilaCarrusel.release()
+                    semFilaCarAux.release()
+
+                
             
         elif(JuegoAleatorio1 == "Barco Pirata"):
-            
-            if(filaBarco < 6):
+            while (dispBarco == False): #Si no hay espacio en la fila, esperan
+                with cv7:
+                    cv7.wait()
+                
+
+            if (dispBarco == True):
+                semFilaBarco.acquire() #Agarra puesto en la fila
+                print("Entro a la fila "+threading.current_thread().name)
+                contador += 1
+                Lock.acquire()
                 filaBarco += 1
                 filazonacomun -= 1
-                BarcoPirata()
+                Lock.release()
+                BarcoPirata(contador)
+                
+                Lock.acquire()
+                contBarco -= 1 #Se baja persona del juego
+                Lock.release()
+                
+                if (contBarco == 0): #Si no quedan mas jugadores en la fila
+                    with cv7:
+                        cv7.notify_all() #Libero fila por si esta bloqueada
+                    print("Salgo de la fila " +threading.current_thread().name)
+                    dispBarco = True 
+                    semFilaBarAux.release() #Libero recursos de semaforos
+                    semFilaBarco.release()
+                
+                while (contBarco == 1):
+                    print("Salgo de la fila " +threading.current_thread().name)
+                    with cv7:
+                        cv7.wait()
+                    semFilaBarco.release()
+                    semFilaBarAux.release()
+
             
      
 
@@ -262,5 +408,6 @@ while(i < NTHREAD):
     
     i+=1
     
-    
+
+
     
