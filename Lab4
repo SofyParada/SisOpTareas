@@ -1,42 +1,124 @@
-import threading
+from threading import Thread
+from threading import Semaphore
+from threading import Lock
+from threading import Condition
 import time
 import datetime
 import random
+import threading
 
-NTHREAD = 150
-Juegos = ["Montaña Rusa", "Casa de Terror", "Carrusel", "Barco Pirata"]
+fzona = open("Zona_Comun.txt","w")
+fmontana = open("Montana_rusa.txt","w")
+fcasa = open("Casa_Terror.txt","w")
+fcarrusel = open("Carrusel.txt","w")
+fbarco = open("Barco_Pirata.txt","w")
+
+
+NTHREAD = 4
 tiemponow = datetime.datetime.now() #para luego hacer los txt pedidos con el tiempo corresondiente
 tiempo = str(tiemponow)[11:]
-semaforo1 = threading.Semaphore(1) #Crear variable de tipo semaforo1
-semaforo2 = threading.Semaphore(1) #Crear variable de tipo semaforo2
-Lock = threading.Lock() #Se crea la variable lock
+semFilaMontana = Semaphore(10)
+semJuegoMontana = Semaphore(10)
+semFilaCasa = Semaphore(8)
+semFilaCasaAux = Semaphore(2)
+semFilaCarrusel = Semaphore(15)
+semFilaBarco = Semaphore(6)
+cv1 = Condition()
+cv2 = Condition()
+cv3 = Condition()
+cv4 = Condition()
+cv4a = Condition()
+cv5 = Condition()
+cv6 = Condition()
+cv7 = Condition()
+cv8 = Condition()
+Lock = Lock() #Se crea la variable lock
 
 filazonacomun = 0
+contMontana = 0
 filaMontana = 0
 filaCasa = 0
+contCasa = 0
 filaCarrusel = 0
+contCarrusel = 0
 filaBarco = 0
+contBarco = 0
 
-quiereMontana = 0
-quiereCasa = 0
-quiereCarrusel = 0
-quiereBarco = 0
+dispMontana = True
+dispCasa = True
+dispCarrusel = True
+dispBarco = True
 
 print(tiempo)
 
 def MontanaRusa():
-    Lock.acquire()
-    if(filaMontana < 10):
-        semaforo1.acquire(Lock)
-    
-    else:
-        filaMontana -= 10
-        semaforo2.release()
-        Lock.release()
+    global filaMontana
+    global dispMontana
+    tiempoa = ""
+    with cv1:
+        tiempoantes = datetime.datetime.now() 
+        tiempoa = str(tiempoantes)[11:]  #Almaceno tiempo
+
+        while (filaMontana < 10):   #Mientras la fila sea menor a 10, personas esperan en la fila
+            print(threading.current_thread().name+"Estoy en la fila")
+            cv1.wait()  #Pausa el proceso
+        
+        if (filaMontana == 10):  #Existen 10 en la fila
+            dispMontana = False  #Pauso las entradas a la fila
+            tiempodesp = datetime.datetime.now()
+            tiempod = str(tiempodesp)[11:]  #Almaceno tiempo
+
+            print(threading.current_thread().name+"Me subi al juego en :"+tiempod)
+            cv1.notify() #Notifico al while previo que se puede continuar
+            Lock.acquire()
+            string = threading.current_thread().name + "," + tiempoa + "," + tiempod + "\n"
+            fmontana.write(string) #Creo string y lo almaceno en txt
+            Lock.release()
+            return
+        
     
 
 def CasaTerror():
-    return 1
+    global filaCasa
+    global dispCasa
+    global contCasa
+    tiempoa = ""
+    tiempoantes = datetime.datetime.now()
+    tiempoa = str(tiempoantes)[11:]
+    while (filaCasa == 8):  #Si la fila es de 8 personas, se bloquea entrada de mas gente, creo que esto ta malo XD
+        dispCasa = False
+        with cv4:
+            cv4.wait()  #Pauso procesos
+
+
+    if (contCasa <= 2):  # Si hay 2 o menos personas en la fila puede entrar al juego
+        semFilaCasaAux.acquire()  #Agarro semaforo con limite de 2 personas
+        contCasa += 1  #Contador de cuantas personas estan en el Juego
+        print(contCasa)
+        filaCasa -= 1  #Resto personas a la fila
+        tiempodesp = datetime.datetime.now()
+        tiempod = str(tiempodesp)[11:]
+        while (contCasa != 2):  #Si hay solo una persona esperando, se pausa su proceso hasta que llegue otra
+            with cv4a:
+                cv4a.wait()
+
+        
+        if (contCasa == 2):  #Si hay 2 personas se continua
+            Lock.acquire()
+            time.sleep(2.5)  #Se duerme el tiempo que dura el juego, si no se usa esto el proceso no funciona muere, se 
+                            #Si uno reintenta hasta que el proceso 1 entre con el 2, funciona, pero si no se muere, no se como arreglarlo
+            Lock.release()
+            with cv4a:
+                cv4a.notify() #Notifico a la persona esperando que puede ingresar
+            with cv4:
+                cv4.notify() #Notifico a la fila que se puede continuar con mas gente
+            Lock.acquire()
+            string = threading.current_thread().name + "," + tiempoa + "," + tiempod + "\n"
+            fcasa.write(string) #Creo string para ingresar a txt
+            Lock.release()
+            return
+        
+
 def Carrusel():
     return 1
 def BarcoPirata():
@@ -45,62 +127,125 @@ def BarcoPirata():
 
 
 def ZonaComun():
-    filazonacomun += 1
-    
-    #Se eligen os dos juegos aleatoriamente de la persona o hebra (sin que se repita el mismo juego)
-    JuegoAleatorio1 = random.choice(Juegos)
-    
-    Juegos2 = Juegos
-    Juegos2.remove(JuegoAleatorio1)
-    
-    JuegoAleatorio2 = random.choice(Juegos2)
-    
-    if(JuegoAleatorio1 == "Montaña Rusa"):
-        quiereMontana += 1
-        
-        MontanaRusa()
-        Lock.acquire()
-        while(filaMontana == 10):
-            semaforo2.acquire(Lock)
-        
-        
-        if(filaMontana < 10):
-            filaMontana += 1
-            filazonacomun -= 1
-            
-        
-    elif(JuegoAleatorio1 == "Casa de Terror"):
-        quiereCasa += 1
-        
-        if(filaCasa < 8):
-            filaCasa += 1
-            filazonacomun -= 1
-            CasaTerror()
-        
-    elif(JuegoAleatorio1 == "Carrusel"):
-        quiereCarrusel += 1
-        
-        if(filaCarrusel < 15):
-            filaCarrusel += 1
-            filazonacomun -= 1
-            Carrusel()
-        
-    elif(JuegoAleatorio1 == "Barco Pirata"):
-        quiereBarco += 1
-        
-        if(filaBarco < 6):
-            filaBarco += 1
-            filazonacomun -= 1
-            BarcoPirata()
-        
+    contador = 0
+    while (contador < 1):
+        global filazonacomun
+        global filaMontana
+        global filaCasa
+        global filaCarrusel
+        global filaBarco
+        global dispMontana
+        global dispCasa
+        global dispCarrusel
+        global dispBarco
+        global contMontana
+        global contCasa
+        global contCarrusel
+        global contBarco
+        Juegos = ["Casa de Terror"]  #Lista de juegos
 
-    return 1
+        Lock.acquire()
+        filazonacomun += 1
+        Lock.release()
+        
+        #Se eligen os dos juegos aleatoriamente de la persona o hebra (sin que se repita el mismo juego)
+        JuegoAleatorio1 = random.choice(Juegos)
+        
+        Juegos2 = Juegos
+        Juegos2.remove(JuegoAleatorio1)
+        
+        if(JuegoAleatorio1 == "Montaña Rusa"):
+
+            while (dispMontana == False and contMontana != 0): #Si no hay espacio en la fila, espero hasta poder entrar
+                print("Me quedo esperando la fila"+threading.current_thread().name)
+                with cv2:
+                    cv2.wait()
+                
+
+            if (dispMontana == True): #Si hay espacio en la fila, agarro semaforo y entro
+                semFilaMontana.acquire()
+                Lock.acquire()
+                filaMontana += 1 #Cont gente en la fila
+                filazonacomun -= 1
+                contMontana += 1 #Cont gente para el juego
+                Lock.release()
+                MontanaRusa()
+
+                contMontana -= 1 #Se baja una persona del juego
+
+                if (contMontana == 0): #Si no quedan mas personas, solo entra el ultimo jugador
+                    print("Termina monta;a rusa")
+
+                    filaMontana = 0 #Se resetea fila
+                    dispMontana = True #Se permite entrada de gente a la fila
+                    with cv2:
+                        cv2.notify_all() #Despauso entrada de gente
+                    semFilaMontana.release() #Libero recursos del semaforo
+                    contador += 1 #Contador de juegos por persona
+                
+                while (contMontana != 0): #Otros jugadores
+
+                    with cv2:
+                        cv2.wait()  #Esperan hasta que el ultimo jugador se baje
+                    semFilaMontana.release() #Liberan recursos
+                    contador += 1
+
+                
+            
+        elif(JuegoAleatorio1 == "Casa de Terror"):
+            
+            while (dispCasa == False): #Si no hay espacio en la fila, esperan
+                with cv3:
+                    cv3.wait()
+                
+
+            if (dispCasa == True):
+                semFilaCasa.acquire() #Agarra puesto en la fila
+                print("Entro a la fila"+threading.current_thread().name)
+                Lock.acquire()
+                filaCasa += 1
+                filazonacomun -= 1
+                Lock.release()
+                CasaTerror()
+
+                contCasa -= 1 #Se baja persona del juego
+                print(contCasa,  threading.current_thread().name)
+                
+                if (contCasa == 0): #Si no quedan mas jugadores en la fila
+                    with cv3:
+                        cv3.notify_all() #Libero fila por si esta bloqueada
+                    print("Salgo de la fila" +threading.current_thread().name)
+
+                    dispCasa = True 
+                    semFilaCasaAux.release() #Libero recursos de semaforos
+                    semFilaCasa.release()
+                    contador += 1
+
+                return
+            
+        elif(JuegoAleatorio1 == "Carrusel"):
+            
+            if(filaCarrusel < 15):
+                filaCarrusel += 1
+                filazonacomun -= 1
+                Carrusel()
+            
+        elif(JuegoAleatorio1 == "Barco Pirata"):
+            
+            if(filaBarco < 6):
+                filaBarco += 1
+                filazonacomun -= 1
+                BarcoPirata()
+            
+
+    return 
 
 i = 0
 while(i < NTHREAD):
+    
     #Se crea la hebra
     NPERSONA ='Persona' + str(i+1)
-    threading.Thread(name=NPERSONA, target=ZonaComun, args=( ))
+    threading.Thread(name=NPERSONA, target=ZonaComun, args=( )).start()
     
     i+=1
     
