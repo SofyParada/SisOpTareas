@@ -1,3 +1,2 @@
 main:
-	gcc Lab1.c -o lab1
-	./lab1
+	python3 Lab4.py
